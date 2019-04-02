@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    <h2>预加载</h2>
+    <div>
+        <img data-src="https://f12.baidu.com/it/u=2465775762,1509670197&fm=72"/>
+        <img data-src="https://f11.baidu.com/it/u=642753244,1588215304&fm=72"/>
+        <img data-src=""/>
+    </div>
+    <h2>延迟加载</h2>
+    <div>
+        <img data-src0="https://ss1.bdstatic.com/70cFuXSh_Q1YnxGkpoWK1HF6hhy/it/u=843981264,3722732325&fm=26&gp=0.jpg">
+        <img data-src0="https://ss1.bdstatic.com/70cFuXSh_Q1YnxGkpoWK1HF6hhy/it/u=843981264,3722732325&fm=26&gp=0.jpg">
+        <img data-src0="https://ss1.bdstatic.com/70cFuXSh_Q1YnxGkpoWK1HF6hhy/it/u=2276385072,2041596909&fm=26&gp=0.jpg">
+    </div>
+    <h2>动态插入的</h2>
+
+    <script src="js/imgLoader.js"></script>
+    <script>
+        //### 调用方法一 ###
+        var res=new ImgLoader();
+        res.basePath="";
+        res.crossOrigin="anonymous";//允许匿名访问
+        res.loadList=['src',"https://f12.baidu.com/it/u=3087422712,1174175413&fm=72"];
+        //加载中
+        res.onProgress=function(plan){
+             console.log(plan);
+        }
+        //加载完成
+        res.onComplete=function(){
+            console.log("ok");
+            document.body.appendChild(res.getImg("https://f12.baidu.com/it/u=3087422712,1174175413&fm=72"));
+        }
+        //开始加载
+        res.load();
+
+        //### 调用方法二 (图片延迟加载) ###
+        setTimeout(() => {
+            var res2=new ImgLoader();
+            res2.basePath="";
+            res2.loadList=['src0'];
+            res2.load();
+        }, 2000);
+    </script>
+</body>
+</html>

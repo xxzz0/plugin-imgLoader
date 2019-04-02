@@ -1,12 +1,22 @@
+/**
+ * @class ImgLoader 图片加载
+ * @method load 开始加载
+ * @method getImg 获取图片对象
+ * @property {string} basePath  基础路径
+ * @property {string} crossOrigin 源
+ * @property {array} loadList 加载列表['src','src1','img/i1.jpg'……]；名称带 . 或 / 默认当成路径加载；其他值通过data-*获取元素加载，并且data-*不能含有- 和 大写字母
+ * @property {number} time 单张图片最大加载时间
+ * @property {function} onProgress 加载进度
+ * @property {function} onComplete 加载完成
+ */
 function ImgLoader(){
     this.basePath="";
     this.crossOrigin="";
-    this.loadType=['_src'];//自定义路径名['_src','_src1','img/i1.jpg'……], 名称带 . 或 / 默认当成路径
-    this.time=5000;//单张图片最大加载时间
+    this.loadList=['src'];
+    this.time=5000;
     this.onProgress=function(){};
     this.onComplete=function(){};
-
-    this._imgList={};
+    this._objList={};
 }
 ImgLoader.prototype.isAp=function(path){
     //是否为绝对路径
@@ -18,15 +28,15 @@ ImgLoader.prototype.isAp=function(path){
 }
 ImgLoader.prototype.isPath=function(str){
     //判断是否为路径
-    if(/.|\//i.test(str)){
-        return false;
+    if(/\.|\//i.test(str)){
+        return true;
     }else{
         return false;
     }
 }
 ImgLoader.prototype.load=function(){
     var that=this;
-    var loadItem=this._createQueue(this.loadType);
+    var loadItem=this._createQueue(this.loadList);
     var total=loadItem.length,
         loaded=0,
         isOvertime=false,//是否超时
@@ -53,34 +63,36 @@ ImgLoader.prototype.load=function(){
         }
     }
 }
-ImgLoader.prototype._createQueue=function(loadType){
+ImgLoader.prototype._createQueue=function(loadList){
     var that=this;
     var loadItem=[];
-    for(var i=0;i<loadType.length;i++){
-        if(that.isPath(loadType[i])){
+    for(var i=0;i<loadList.length;i++){
+        if(that.isPath(loadList[i])){
             var img=new Image();
             if(that.crossOrigin){
                 img.crossOrigin=that.crossOrigin;
             }
-            var path=loadType[i];
+            var path=loadList[i];
             loadItem.push({
                 tag:img,
                 src:that.isAp(path)?path:that.basePath+path
             });
-            that._imgList[path]=img;
+            that._objList[path]=img;
         }else{
-            var $aImg=$('img['+loadType[i]+']');
-            $aImg.each(function(index,dom){
+            var datakey=loadList[i];
+            var nodeList=document.querySelectorAll("img[data-"+datakey+"]");
+            for(var k=0;k<nodeList.length;k++){
+                var dom=nodeList[k];
                 if(that.crossOrigin){
                     dom.crossOrigin=that.crossOrigin;
                 }
-                var path=$(dom).attr(loadType[i]);
+                var path=dom.dataset[datakey];
                 loadItem.push({
                     tag:dom,
                     src:that.isAp(path)?path:that.basePath+path
                 });
-                that._imgList[path]=dom;
-            });
+                that._objList[path]=dom;
+            };
         }
     };
     return loadItem;
@@ -103,29 +115,5 @@ ImgLoader.prototype._loadOnce=function(item,callback){
 }
 ImgLoader.prototype.getImg=function(path){
     //获取图片对象
-    return this._imgList[path];
+    return this._objList[path];
 }
-//###################
-// //调用方法一
-// var imgLoader=new ImgLoader();
-// imgLoader.basePath="";
-// imgLoader.crossOrigin="anonymous";
-// imgLoader.loadType=['_src'];
-// //加载中
-// imgLoader.onProgress=function(plan){
-//      console.log(plan);
-// }
-// //加载完成
-// imgLoader.onComplete=function(){
-//     setTimeout(function () {
-//         $('#page_loading').moveOut();
-//     }, 400);
-// }
-// //开始加载
-// imgLoader.load();
-
-// //调用方法二 (图片延迟加载)
-// var imgLoader2=new ImgLoader();
-// imgLoader2.basePath="";
-// imgLoader2.loadType=['_src0'];
-// imgLoader2.load();
